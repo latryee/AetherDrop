@@ -1,0 +1,17 @@
+{
+  "name": "AetherDrop - Fast Device Transfer",
+  "short_name": "AetherDrop",
+  "description": "Ultra fast P2P file & text transfer across iPad, Mobile and PC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090D",
+  "theme_color": "#08090D",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="aetherCoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <linearGradient id="aetherRingGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#C084FC" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#818CF8" stop-opacity="0.9" />
+    </linearGradient>
+
+    <filter id="aetherGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Dark glass background squircle -->
+  <rect x="4" y="4" width="92" height="92" rx="26" fill="#0A0B12" stroke="url(#aetherRingGrad)" stroke-width="3" />
+
+  <!-- Orbital rings -->
+  <ellipse cx="50" cy="50" rx="34" ry="15" transform="rotate(-28 50 50)" stroke="url(#aetherRingGrad)" stroke-width="2.5" stroke-dasharray="5 3" />
+  <ellipse cx="50" cy="50" rx="34" ry="15" transform="rotate(38 50 50)" stroke="url(#aetherCoreGrad)" stroke-width="2.5" />
+
+  <!-- Glowing central node & beam -->
+  <g filter="url(#aetherGlow)">
+    <circle cx="50" cy="50" r="14" fill="url(#aetherCoreGrad)" />
+    <path d="M50 38L50 58M50 38L43 45M50 38L57 45" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="50" cy="62" r="2.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- Orbiting dots -->
+  <circle cx="24" cy="38" r="3.5" fill="#38BDF8" filter="url(#aetherGlow)" />
+  <circle cx="76" cy="62" r="3.5" fill="#A855F7" filter="url(#aetherGlow)" />
+</svg>
