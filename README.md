@@ -3,14 +3,17 @@
 # ⚡ AetherDrop Pro
 **Ultra-Fast, Zero-Cloud, End-to-End Encrypted P2P Cross-Device Transfer**
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/deploy-status?style=flat)](https://app.netlify.com)
+[![Live Web App](https://img.shields.io/badge/Canl%C4%B1%20Uygulama-aetherdrops.netlify.app-8B5CF6?style=for-the-badge&logo=safari&logoColor=white)](https://aetherdrops.netlify.app/)
+
 [![WebRTC DataChannel](https://img.shields.io/badge/WebRTC-P2P%20Encrypted-purple.svg)](https://webrtc.org)
 [![Platform: iPad • iOS • Android • macOS • Windows • Linux](https://img.shields.io/badge/Platform-iPad%20%7C%20iOS%20%7C%20Android%20%7C%20PC-06b6d4.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
 
+### 🌐 Canlı Uygulama: [https://aetherdrops.netlify.app/](https://aetherdrops.netlify.app/)
+
 *iPad, iPhone, Android ve Bilgisayarlar arasında sıfır sunucu depolaması ve dosya boyutu sınırı olmaksızın, doğrudan ve uçtan uca şifreli dosya & metin aktarımı.*
 
-[Özellikler](#-özellikler) • [Nasıl Çalışır?](#-nasıl-çalışır) • [Netlify Yayını](#-netlify-üzerinde-tek-tıkla-yayınlama) • [PWA Kurulumu](#-ipad--iphone-pwa-kurulumu) • [Geliştirme](#-yerel-geliştirme)
+[Canlı Uygulamayı Aç](https://aetherdrops.netlify.app/) • [Özellikler](#-özellikler) • [Nasıl Çalışır?](#-nasıl-çalışır) • [PWA Kurulumu](#-ipad--iphone-pwa-kurulumu) • [Yerel Geliştirme](#-yerel-geliştirme)
 
 </div>
 
@@ -56,32 +59,9 @@ sequenceDiagram
 
 ---
 
-## 🚀 Netlify Üzerinde Tek Tıkla Yayınlama
-
-Proje kökünde bulunan `netlify.toml` dosyası SPA yönlendirmelerini (`/* -> /index.html`) ve önbellek güvenlik başlıklarını otomatik yönetir.
-
-### 1. Yöntem: GitHub Üzerinden (Önerilen)
-1. Bu depoyu GitHub'a aktarın:
-   ```bash
-   git remote add origin https://github.com/latryee/AetherDrop.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. [Netlify Kontrol Paneli](https://app.netlify.com)'ne gidin.
-3. **"Add new site"** -> **"Import an existing project"** -> **"GitHub"** seçeneğine tıklayın.
-4. `AetherDrop` reposunu seçin. (Derleme komutu `npm run build` ve klasör `dist` otomatik gelecektir).
-5. **"Deploy AetherDrop"** butonuna basın. 30 saniye içinde siteniz küresel CDN üzerinde yayında olacaktır!
-
-### 2. Yöntem: Netlify CLI
-```bash
-npx netlify deploy --prod
-```
-
----
-
 ## 📱 iPad & iPhone PWA Kurulumu
 
-1. iPad veya iPhone'unuzda Safari tarayıcısını açıp yayınlanan URL'ye gidin.
+1. iPad veya iPhone'unuzda Safari tarayıcısını açıp **[https://aetherdrops.netlify.app/](https://aetherdrops.netlify.app/)** adresine gidin.
 2. Safari'nin alt menüsündeki **Paylaş** (`Share`) butonuna dokunun.
 3. Listeden **"Ana Ekrana Ekle" (Add to Home Screen)** seçeneğini seçin.
 4. Artık AetherDrop, ana ekranınızda bağımsız, tam ekran yerel bir Apple uygulaması olarak kullanılabilir.
@@ -118,5 +98,5 @@ npm run preview
 ---
 
 <div align="center">
-Geliştirici: <b>latryee</b> • MIT Lisansı ile Lisanslanmıştır.
+Geliştirici: <b>latryee</b> • Canlı Uygulama: <a href="https://aetherdrops.netlify.app/">https://aetherdrops.netlify.app/</a> • MIT Lisansı
 </div>
