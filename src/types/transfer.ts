@@ -26,6 +26,7 @@ export interface TransferItem {
   speedBytesPerSec: number;
   etaSeconds: number;
   blobUrl?: string;
+  blob?: Blob;
   file?: File;
   startedAt?: number;
   completedAt?: number;

@@ -12,19 +12,21 @@ import {
   FileAudio,
   FileArchive,
   File,
-  Eye,
   Trash2,
+  Share2,
 } from 'lucide-react';
 
 interface TransferListProps {
   transfers: TransferItem[];
-  onDownload: (blobUrl: string, fileName: string) => void;
+  onDownload: (item: TransferItem) => void;
+  onShare?: (item: TransferItem) => void;
   onClearCompleted: () => void;
 }
 
 export const TransferList: React.FC<TransferListProps> = ({
   transfers,
   onDownload,
+  onShare,
   onClearCompleted,
 }) => {
   if (transfers.length === 0) {
@@ -126,27 +128,29 @@ export const TransferList: React.FC<TransferListProps> = ({
                       </span>
 
                       {item.blobUrl && (
-                        <>
-                          {item.fileType.startsWith('image/') && (
-                            <a
-                              href={item.blobUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              title="Önizle"
-                              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
+                        <div className="flex items-center gap-1.5">
+                          {/* Apple / Mobile native share button (Saves directly to Photos or Files) */}
+                          {item.blob && typeof navigator !== 'undefined' && 'canShare' in navigator && (
+                            <button
+                              onClick={() => onShare && onShare(item)}
+                              title="iPad Dosyalarına veya Fotoğraflara Kaydet"
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-semibold text-white shadow-md active:scale-95 cursor-pointer"
                             >
-                              <Eye className="w-4 h-4" />
-                            </a>
+                              <Share2 className="w-3.5 h-3.5" />
+                              <span>Kaydet / Paylaş</span>
+                            </button>
                           )}
+
+                          {/* Force direct file download (prevents Safari preview on screen) */}
                           <button
-                            onClick={() => onDownload(item.blobUrl!, item.fileName)}
-                            title="İndir"
+                            onClick={() => onDownload(item)}
+                            title="İndirilenlere Kaydet"
                             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-semibold text-white shadow-md active:scale-95 cursor-pointer"
                           >
                             <Download className="w-3.5 h-3.5" />
                             <span>İndir</span>
                           </button>
-                        </>
+                        </div>
                       )}
                     </div>
                   )}

@@ -9,7 +9,9 @@ import { TransferList } from './components/TransferList';
 import { TextTransfer } from './components/TextTransfer';
 import { ConnectionModal } from './components/ConnectionModal';
 import { SettingsModal } from './components/SettingsModal';
-import { Radio, MessageSquare, History } from 'lucide-react';
+import { shareFileNative } from './services/device';
+import { formatBytes } from './services/fileChunker';
+import { Radio, MessageSquare, History, CheckCircle2, Download, Share2, X } from 'lucide-react';
 
 export function App() {
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
@@ -21,6 +23,7 @@ export function App() {
   const [messages, setMessages] = useState<TextMessageItem[]>([]);
   const [selectedPeerId, setSelectedPeerId] = useState<string>('');
   const [toast, setToast] = useState<string | null>(null);
+  const [lastReceivedItem, setLastReceivedItem] = useState<TransferItem | null>(null);
 
   const [activeTab, setActiveTab] = useState<'radar' | 'text' | 'history'>('radar');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
@@ -81,6 +84,11 @@ export function App() {
           }
           return [item, ...prev];
         });
+
+        // Prompt user immediately when an incoming file finishes downloading
+        if (item.direction === 'incoming' && item.status === 'completed') {
+          setLastReceivedItem(item);
+        }
       },
       onTextMessage: (msg) => {
         setMessages((prev) => [msg, ...prev]);
@@ -135,9 +143,20 @@ export function App() {
     webrtcRef.current.connectToPeer(targetCode);
   };
 
-  const handleDownload = (blobUrl: string, fileName: string) => {
-    if (!webrtcRef.current) return;
-    webrtcRef.current.triggerDownload(blobUrl, fileName);
+  const handleDownload = (item: TransferItem) => {
+    if (!webrtcRef.current || !item.blobUrl) return;
+    webrtcRef.current.triggerDownload(item.blob, item.blobUrl, item.fileName);
+  };
+
+  const handleShare = async (item: TransferItem) => {
+    if (item.blob) {
+      const success = await shareFileNative(item.blob, item.fileName, item.fileType);
+      if (!success) {
+        handleDownload(item);
+      }
+    } else {
+      handleDownload(item);
+    }
   };
 
   const handleClearCompleted = () => {
@@ -257,6 +276,7 @@ export function App() {
                 <TransferList
                   transfers={transfers.slice(0, 3)}
                   onDownload={handleDownload}
+                  onShare={handleShare}
                   onClearCompleted={handleClearCompleted}
                 />
               </div>
@@ -288,6 +308,7 @@ export function App() {
               <TransferList
                 transfers={transfers}
                 onDownload={handleDownload}
+                onShare={handleShare}
                 onClearCompleted={handleClearCompleted}
               />
             )}
@@ -296,9 +317,58 @@ export function App() {
 
       </main>
 
+      {/* iPad / Mobile Quick File Received Action Card */}
+      {lastReceivedItem && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-md p-4 rounded-3xl glass-panel-glow border border-purple-500/40 shadow-2xl flex items-center justify-between gap-3 animate-fadeIn">
+          <div className="min-w-0 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-300">
+                <span>Dosya Alındı!</span>
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-white truncate max-w-[140px] sm:max-w-[200px]" title={lastReceivedItem.fileName}>
+                {lastReceivedItem.fileName}
+              </p>
+              <p className="text-[11px] text-slate-400">{formatBytes(lastReceivedItem.fileSize)}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {lastReceivedItem.blob && typeof navigator !== 'undefined' && 'canShare' in navigator && (
+              <button
+                onClick={() => handleShare(lastReceivedItem)}
+                title="iPad Dosyalarına veya Fotoğraflara Kaydet"
+                className="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-xs font-bold text-white shadow-lg active:scale-95 cursor-pointer flex items-center gap-1"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Kaydet</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => handleDownload(lastReceivedItem)}
+              title="İndirilenler Klasörüne Kaydet"
+              className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow-md active:scale-95 cursor-pointer flex items-center gap-1"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>İndir</span>
+            </button>
+
+            <button
+              onClick={() => setLastReceivedItem(null)}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Toast notification banner */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl glass-panel-glow border border-cyan-500/50 text-xs sm:text-sm font-semibold text-white shadow-2xl flex items-center gap-2">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 px-5 py-2.5 rounded-2xl glass-panel-glow border border-cyan-500/50 text-xs sm:text-sm font-semibold text-white shadow-2xl flex items-center gap-2">
           <span>{toast}</span>
         </div>
       )}

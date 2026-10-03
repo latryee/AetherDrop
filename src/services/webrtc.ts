@@ -337,13 +337,17 @@ export class WebRTCService {
             item.completedAt = Date.now();
             const blob = receiver.assembleBlob();
             const blobUrl = URL.createObjectURL(blob);
+            item.blob = blob;
             item.blobUrl = blobUrl;
 
             soundEffects.playSuccessSound();
             this.triggerConfetti();
 
-            if (this.autoDownload) {
-              this.triggerDownload(blobUrl, item.fileName);
+            // On Apple iPad/iPhone, unprompted background a.click() navigates the tab away.
+            // On desktop, auto-download via application/octet-stream works seamlessly.
+            const isAppleMobile = this.myDevice?.type === 'ipad' || this.myDevice?.type === 'iphone';
+            if (this.autoDownload && !isAppleMobile) {
+              this.triggerDownload(blob, blobUrl, item.fileName);
             }
           }
 
@@ -361,13 +365,15 @@ export class WebRTCService {
           item.completedAt = Date.now();
           const blob = receiver.assembleBlob();
           const blobUrl = URL.createObjectURL(blob);
+          item.blob = blob;
           item.blobUrl = blobUrl;
 
           soundEffects.playSuccessSound();
           this.triggerConfetti();
 
-          if (this.autoDownload) {
-            this.triggerDownload(blobUrl, item.fileName);
+          const isAppleMobile = this.myDevice?.type === 'ipad' || this.myDevice?.type === 'iphone';
+          if (this.autoDownload && !isAppleMobile) {
+            this.triggerDownload(blob, blobUrl, item.fileName);
           }
           this.events.onTransferUpdate({ ...item });
         }
@@ -541,15 +547,33 @@ export class WebRTCService {
   }
 
   /**
-   * Helper to trigger instant file download in browser
+   * Helper to trigger instant file download in browser without opening inline on screen
    */
-  public triggerDownload(blobUrl: string, fileName: string) {
+  public triggerDownload(blob: Blob | undefined, blobUrl: string, fileName: string) {
+    let downloadUrl = blobUrl;
+    let shouldRevoke = false;
+
+    // Wrap in application/octet-stream so Safari/iOS cannot preview inline and must download
+    if (blob) {
+      const octetBlob = new Blob([blob], { type: 'application/octet-stream' });
+      downloadUrl = URL.createObjectURL(octetBlob);
+      shouldRevoke = true;
+    }
+
     const a = document.createElement('a');
-    a.href = blobUrl;
+    a.href = downloadUrl;
     a.download = fileName;
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      if (shouldRevoke) {
+        URL.revokeObjectURL(downloadUrl);
+      }
+    }, 2000);
   }
 
   /**

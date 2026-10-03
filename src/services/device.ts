@@ -101,3 +101,26 @@ export function createLocalDeviceInfo(peerId: string): DeviceInfo {
     connectedAt: Date.now(),
   };
 }
+
+/**
+ * Trigger native Apple / mobile Share sheet to save directly to Photos / Files
+ */
+export async function shareFileNative(blob: Blob, fileName: string, fileType: string): Promise<boolean> {
+  try {
+    if (typeof navigator !== 'undefined' && 'canShare' in navigator) {
+      const file = new File([blob], fileName, { type: fileType || 'application/octet-stream' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: fileName,
+        });
+        return true;
+      }
+    }
+  } catch (err: unknown) {
+    if ((err as Error)?.name !== 'AbortError') {
+      console.warn('Native share failed:', err);
+    }
+  }
+  return false;
+}
