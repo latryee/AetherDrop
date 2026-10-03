@@ -1,5 +1,5 @@
 import { Peer, type DataConnection } from 'peerjs';
-import type { DeviceInfo, TransferItem, TextMessageItem, DataPacket, FileHeaderPacket, FileChunkPacket } from '../types/transfer';
+import type { DeviceInfo, TransferItem, TextMessageItem, DataPacket, HandshakePacket, FileHeaderPacket, FileChunkPacket } from '../types/transfer';
 import { createLocalDeviceInfo, getStoredDeviceName } from './device';
 import { FileReceiver, sendFileInChunks } from './fileChunker';
 import { soundEffects } from './audio';
@@ -202,17 +202,18 @@ export class WebRTCService {
    */
   private setupConnection(conn: DataConnection, isInitiator: boolean) {
     conn.on('open', () => {
-      // Send handshake with local device info
+      // Send initial handshake with local device info
       if (this.myDevice) {
         this.myDevice.name = getStoredDeviceName(this.myDevice.name);
-        const handshake: DataPacket = {
+        const handshake: HandshakePacket = {
           type: 'HANDSHAKE',
           device: this.myDevice,
+          isAck: false,
         };
         conn.send(handshake);
       }
 
-      // Initial placeholder device info until handshake response arrives
+      // Initial placeholder device info
       const tempDevice: DeviceInfo = {
         id: conn.peer,
         name: isInitiator ? 'Eşleşen Cihaz' : 'Bağlanan Cihaz',
@@ -223,8 +224,6 @@ export class WebRTCService {
       };
 
       this.connections.set(conn.peer, { conn, device: tempDevice });
-      this.events.onPeerConnected(tempDevice);
-      soundEffects.playConnectSound();
     });
 
     conn.on('data', (data: unknown) => {
@@ -249,9 +248,12 @@ export class WebRTCService {
 
     switch (packet.type) {
       case 'HANDSHAKE': {
+        const handshakePkt = packet as HandshakePacket;
         const existing = this.connections.get(peerId);
+        const wasAlreadyNotified = existing && existing.device.os !== 'Bilinmiyor';
+
         const updatedDevice: DeviceInfo = {
-          ...packet.device,
+          ...handshakePkt.device,
           id: peerId,
           isSelf: false,
         };
@@ -262,18 +264,23 @@ export class WebRTCService {
           this.connections.set(peerId, { conn, device: updatedDevice });
         }
 
-        // Send handshake back if not already acknowledged
-        if (this.myDevice && conn.open) {
+        // Only reply if this packet is NOT already an ACK (breaks the ping-pong loop)
+        if (!handshakePkt.isAck && this.myDevice && conn.open) {
           conn.send({
             type: 'HANDSHAKE',
             device: {
               ...this.myDevice,
               name: getStoredDeviceName(this.myDevice.name),
             },
-          } as DataPacket);
+            isAck: true,
+          } as HandshakePacket);
         }
 
-        this.events.onPeerConnected(updatedDevice);
+        // Only trigger sound and peerConnected event ONCE per peer session
+        if (!wasAlreadyNotified) {
+          this.events.onPeerConnected(updatedDevice);
+          soundEffects.playConnectSound();
+        }
         break;
       }
 

@@ -9,7 +9,7 @@ import { TransferList } from './components/TransferList';
 import { TextTransfer } from './components/TextTransfer';
 import { ConnectionModal } from './components/ConnectionModal';
 import { SettingsModal } from './components/SettingsModal';
-import { Radio, MessageSquare, History, Sparkles, Smartphone, ShieldCheck, Zap } from 'lucide-react';
+import { Radio, MessageSquare, History } from 'lucide-react';
 
 export function App() {
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
@@ -57,12 +57,15 @@ export function App() {
       },
       onPeerConnected: (peer) => {
         setPeers((prev) => {
+          const alreadyExists = prev.some((p) => p.id === peer.id);
+          if (!alreadyExists) {
+            setToast(`⚡ ${peer.name} eşleşti! Artık dosya gönderebilirsiniz.`);
+            setTimeout(() => setToast(null), 4000);
+          }
           const filtered = prev.filter((p) => p.id !== peer.id);
           return [...filtered, peer];
         });
         setSelectedPeerId((curr) => curr || peer.id);
-        setToast(`⚡ ${peer.name} eşleşti! Artık dosya gönderebilirsiniz.`);
-        setTimeout(() => setToast(null), 4000);
       },
       onPeerDisconnected: (peerId) => {
         setPeers((prev) => prev.filter((p) => p.id !== peerId));
@@ -291,25 +294,6 @@ export function App() {
           </div>
         )}
 
-        {/* Quick Feature Badges Footer */}
-        <div className="mt-auto pt-8 pb-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
-          <div className="flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Sınırsız Boyut & Hız</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Doğrudan P2P Şifreli</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
-            <span>iPad, Mobil & Masaüstü Uyumlu</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            <span>Netlify Hazır</span>
-          </div>
-        </div>
       </main>
 
       {/* Toast notification banner */}

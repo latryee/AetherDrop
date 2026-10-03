@@ -55,6 +55,7 @@ export type PacketType =
 export interface HandshakePacket {
   type: 'HANDSHAKE';
   device: DeviceInfo;
+  isAck?: boolean;
 }
 
 export interface FileHeaderPacket {
