@@ -270,11 +270,11 @@ export function App() {
               onSendFiles={handleSendFiles}
             />
 
-            {/* Quick Mini Transfer List inside radar tab */}
+            {/* All Transfers List inside radar tab */}
             {transfers.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-6">
                 <TransferList
-                  transfers={transfers.slice(0, 3)}
+                  transfers={transfers}
                   onDownload={handleDownload}
                   onShare={handleShare}
                   onClearCompleted={handleClearCompleted}
